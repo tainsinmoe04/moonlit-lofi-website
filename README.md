@@ -2,6 +2,14 @@
 
 A dreamy music channel website with a sky-blue glass interface, music playback, playlists, favorites, a queue and sleep timer.
 
+**[Listen live — Moonlit Lofi](https://moonlit-lofi-website.vercel.app/)**
+
+## Latest website design
+
+The complete public website, captured from the live Vercel deployment.
+
+[![Moonlit Lofi — latest full-page website screenshot](docs/moonlit-lofi-full-page.jpg)](https://moonlit-lofi-website.vercel.app/)
+
 ## Hosting architecture
 
 - **Vercel** serves the public Next.js website and its restricted music API gateway.

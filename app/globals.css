@@ -24,3 +24,10 @@ header{position:absolute;inset:0 0 auto;z-index:4;height:65px;padding:0 3.5%;dis
 
 .studio{align-self:flex-start;max-height:100%;min-height:0}
 
+
+/* Repeat is available on every screen, with an explicit mode indicator. */
+.controls .repeat-control{position:relative;border-radius:8px;width:34px;height:32px}
+.controls .repeat-control.active-control{background:rgba(255,255,255,.74);box-shadow:0 2px 9px rgba(53,107,159,.12)}
+.repeat-status{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font-size:7px;font-weight:700;letter-spacing:.4px;line-height:1;background:#eaf6ff;border-radius:4px;padding:2px 3px}
+.repeat-status:empty{display:none}.playlist-more{display:flex;margin:14px auto 0}.playlist-more .expanded{transform:rotate(180deg)}
+@media(max-width:650px){.controls>button.repeat-control{display:flex;width:27px;height:28px}.controls .repeat-control svg{width:17px;height:17px}.now{width:calc(100% - 177px)}.now>img{width:44px}.repeat-status{font-size:6px;bottom:-3px}.controls{gap:5px}.playlist-more{margin-top:11px}}

@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
+.dev.vars*
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+backend/sites/.openai/hosting.json
+backend/sites/dist/
+backend/sites/.wrangler/
+backend/sites/.sites-runtime/

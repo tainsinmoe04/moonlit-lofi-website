@@ -1,0 +1,5 @@
+backend/
+.git/
+.env*
+!.env.example
+*.tsbuildinfo

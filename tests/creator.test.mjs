@@ -10,7 +10,7 @@ async function fixture(){
  const sqlite=new DatabaseSync(':memory:');
  for(const f of readdirSync(path.join(root,'drizzle')).filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(path.join(root,'drizzle',f),'utf8'));
  const db={prepare(sql){let args=[];const query={bind(...a){args=a;return query},async all(){return {results:sqlite.prepare(sql).all(...args)}},async first(){return sqlite.prepare(sql).get(...args)||null},async run(){return sqlite.prepare(sql).run(...args)}};return query}};
- let identity=null;const env={DB:db,ADMIN_EMAIL:'creator@example.test',BUCKET:{async get(){return {body:'audio',size:5,writeHttpMetadata(h){h.set('Content-Type','audio/mpeg')}}}}};
+ let identity=null;const env={DB:db,ADMIN_EMAIL:'creator@example.test',BUCKET:{async get(){return {body:'audio',size:5,range:{offset:0,length:5},writeHttpMetadata(h){h.set('Content-Type','audio/mpeg')}}}}};
  const cache=new Map();
  const workers=new SyntheticModule(['env'],function(){this.setExport('env',env)});
  const auth=new SyntheticModule(['getChatGPTUser'],function(){this.setExport('getChatGPTUser',async()=>identity)});
@@ -29,7 +29,7 @@ test('drafts, unpublishing and restoration preserve audio while staying private'
  assert.ok(!(await(await r.GET(f.request('tracks'))).json()).some(t=>t.id===id));
  const media=await f.route('media/[key]');assert.equal((await media.GET(f.request('media/key'),{params:Promise.resolve({key:'11111111-1111-4111-8111-111111111111'})})).status,404);
  f.signIn();await r.PATCH(f.request('tracks','PATCH',{id,status:'published'}));f.signOut();
- assert.ok((await(await r.GET(f.request('tracks'))).json()).some(t=>t.id===id));
+ assert.ok((await(await r.GET(f.request('tracks'))).json()).some(t=>t.id===id));const completeMedia=await media.GET(f.request('media/key'),{params:Promise.resolve({key:'11111111-1111-4111-8111-111111111111'})});assert.equal(completeMedia.status,200);assert.equal(completeMedia.headers.get('Content-Range'),null);
  f.signIn();await r.PATCH(f.request('tracks','PATCH',{id,status:'unpublished'}));f.signOut();assert.ok(!(await(await r.GET(f.request('tracks'))).json()).some(t=>t.id===id));
  f.signIn();await r.PATCH(f.request('tracks','PATCH',{id,status:'published'}));assert.equal(f.sqlite.prepare('SELECT audio FROM tracks WHERE id=?').get(id).audio,body.audio);
  await r.PATCH(f.request('tracks','PATCH',{id:'atlantis',status:'unpublished'}));f.signOut();assert.ok(!(await(await r.GET(f.request('tracks'))).json()).some(t=>t.id==='atlantis'));

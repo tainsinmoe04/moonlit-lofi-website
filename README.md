@@ -57,6 +57,7 @@ Open `/studio` to use the creator account on the private backend. Studio support
 - Filter listening insights by track, country, and an inclusive UTC date range of up to 366 days. Hour-of-day charts use the selected display time zone. Minutes are listening time, not unique listeners or play counts.
 - The public player remembers the last track, position, playlist, volume, shuffle and repeat settings in this browser. Reloading restores the position while keeping playback paused.
 - Media Session handlers provide play/pause, previous/next, and seeking on supported system media controls. Lock-screen availability varies by device and browser.
+- Artwork uses responsive WebP derivatives and Next.js image optimization on Vercel. The initial page shows a loading placeholder instead of outdated sample covers, fetches the catalog without caching, and refreshes it when returning to the tab. Future artwork uploads are resized to at most 1280 pixels in the browser while keeping the creator's local originals intact.
 
 ## Validation
 

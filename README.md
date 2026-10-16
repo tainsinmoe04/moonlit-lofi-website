@@ -2,6 +2,8 @@
 
 A dreamy music channel website with a sky-blue glass interface, music playback, playlists, favorites, a queue and sleep timer.
 
+Playback supports Repeat off, Repeat all, and Repeat 1 on desktop and mobile. Repeat off stops at the end of the queue; Repeat all restarts the queue; Repeat 1 loops the current track. The playlist section shows four collections initially, with See more / Show less for larger collections.
+
 **[Listen live — Moonlit Lofi](https://moonlit-lofi-website.vercel.app/)**
 
 ## Latest website design

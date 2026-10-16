@@ -52,6 +52,16 @@ Listening events use Vercel's country header and a timestamped HMAC signature. T
 
 Open `/studio` to use the creator account on the private backend. Studio supports audio uploads, replacing published cover artwork, editing metadata and YouTube links, creating/editing playlists, configuring music-platform links, and viewing country/time insights.
 
+- Save tracks as drafts, unpublish without deleting the audio, and restore them later. Drafts and unpublished tracks are excluded from the public catalog and playlist playback. Previously shared static seed files are not DRM-protected.
+- Reuse existing artwork during upload and move playlist tracks up or down to set playback order. Hidden tracks retain their place in the saved playlist and return there when restored.
+- Filter listening insights by track, country, and an inclusive UTC date range of up to 366 days. Hour-of-day charts use the selected display time zone. Minutes are listening time, not unique listeners or play counts.
+- The public player remembers the last track, position, playlist, volume, shuffle and repeat settings in this browser. Reloading restores the position while keeping playback paused.
+- Media Session handlers provide play/pause, previous/next, and seeking on supported system media controls. Lock-screen availability varies by device and browser.
+
+## Validation
+
+Run `npm test` with Node.js 24 for the gateway, SQLite-backed creator routes, playlist visibility/order, date filters, and resume-state validation. Creator route tests use an isolated in-memory database, not production data.
+
 ## Deployment
 
 Import this repository into Vercel as **Next.js**, keep the root directory at the repository root, and configure the three server-only variables above. The included `vercel.json` sets the build commands. Git commits can then trigger deployments automatically.

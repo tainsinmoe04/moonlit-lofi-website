@@ -6,7 +6,7 @@ The implementation is staged behind `MOONLIT_BACKEND=native`. Without that exact
 
 - Existing Vercel project: `tain-sin-moe-s-projects/moonlit-lofi-website`.
 - Neon Free database: `moonlit-lofi-database`, Washington / `iad1`. Preview deployments use separate database branches.
-- Private Blob store required: `moonlit-lofi-private-media`, preferably `iad1` to match the Functions/database region. Never use a public store for member-only audio.
+- Private Blob store: `moonlit-lofi-private-media` (`store_xJcukYblAcdymW7C`), region `iad1` to match the Functions/database region. Never use a public store for member-only audio.
 - The private backup lives outside this public repository under `D:/moonlitlofi/backups/sites-before-vercel-2026-10-17`. It contains database rows and the 12 currently referenced uploaded media files, with SHA-256 checksums. It is not a complete export of unused historical Blob objects.
 - Static sample music, artwork, and the default catalog remain in the repository. Original user asset folders are untouched.
 

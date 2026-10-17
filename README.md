@@ -14,43 +14,33 @@ The complete public website, captured from the live Vercel deployment.
 
 ## Hosting architecture
 
-- **Vercel** serves the public Next.js website and its restricted music API gateway.
-- **The existing private Sites backend** keeps the D1 database, R2 uploads, creator sign-in, track editing and listening insights.
-- `/studio` redirects the creator to the protected backend Studio. Listeners never receive creator privileges.
-- Changes made in Studio appear on the public website when the library refreshes or the page reloads.
-
-The original backend source is preserved in `backend/sites/`. It is excluded from Vercel builds.
+- **Vercel** serves the public website, protected creator Studio, authentication, and music APIs.
+- **Neon Postgres** stores tracks, playlists, channel settings, memberships, and listening insights.
+- **Private Vercel Blob** stores uploaded audio/artwork. Every media read checks public/member/creator access before streaming; audio seeking preserves HTTP byte ranges.
+- `/studio` requires the single owner account. Public sign-up is disabled. Large uploads go directly from the authenticated browser to private Blob storage.
+- The original Sites source remains in `backend/sites/` for recovery and is excluded from Vercel builds. Native production mode does not call it.
 
 ## Local development
 
 ```sh
 npm ci
 cp .env.example .env.local
+```
+
+Configure `MOONLIT_BACKEND=native`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL`. Use an isolated database and a localhost auth URL for development. Never expose these through `NEXT_PUBLIC_` variables. Schema/import and owner setup instructions are in [the migration guide](docs/vercel-migration.md).
+
+```sh
+node scripts/migrate-native.mjs
 npm run dev
 ```
 
-Set these server-only values in `.env.local` and in the Vercel project's production environment:
+## Access boundary
 
-| Variable | Purpose |
-| --- | --- |
-| `SITE_BACKEND_URL` | HTTPS origin of the private music backend |
-| `SITE_BACKEND_TOKEN` | Sites service-access bearer token; never exposed to the browser |
-| `PROXY_SIGNING_SECRET` | Shared HMAC secret, also configured on the backend |
-
-```sh
-npm run build
-npm start
-```
-
-## Public API boundary
-
-The gateway only permits `GET /api/tracks`, `GET /api/playlists`, `GET /api/settings`, `GET /api/media/<uuid>`, and `POST /api/events`. It does not proxy creator writes, upload routes, credentials, cookies, or visitor-supplied identity headers.
-
-Listening events use Vercel's country header and a timestamped HMAC signature. The backend verifies the signature before accepting the supplied country. Raw visitor IP addresses are not stored in the listening database.
+Each creator API verifies a Better Auth session against the single owner record. Browser-supplied identity headers do not grant access. Member codes are checked against active, unexpired hashes in the database. Public playlists and audio omit draft/unpublished/member-only tracks unless the request has access. Listening-country data uses Vercel's platform country header; raw IP addresses are not stored in the listening database.
 
 ## Creator features
 
-Open `/studio` to use the creator account on the private backend. Studio supports audio uploads, replacing published cover artwork, editing metadata and YouTube links, creating/editing playlists, configuring music-platform links, and viewing country/time insights.
+Open `/studio` to sign in with the creator account on Vercel. Studio supports audio uploads, replacing published cover artwork, editing metadata and YouTube links, creating/editing playlists, configuring music-platform links, and viewing country/time insights.
 
 - Save tracks as drafts, unpublish without deleting the audio, and restore them later. Drafts and unpublished tracks are excluded from the public catalog and playlist playback. Previously shared static seed files are not DRM-protected.
 - Reuse existing artwork during upload and move playlist tracks up or down to set playback order. Hidden tracks retain their place in the saved playlist and return there when restored.
@@ -69,13 +59,13 @@ For a newly uploaded track, choose Published + Members — early access. An opti
 
 Tests cover anonymous denial, hash-only code storage, expiry/revocation, draft exclusion, media access, scheduled release, cookie flags, and gateway isolation.
 
-Run `npm test` with Node.js 24 for the gateway, SQLite-backed creator routes, playlist visibility/order, date filters, and resume-state validation. Creator route tests use an isolated in-memory database, not production data.
+Run `npm test` with Node.js 24. Tests cover native PostgreSQL routes and real password/session authentication through isolated PGlite databases, plus the retained legacy gateway/SQLite behavior, playlist ordering, analytics dates, membership, artwork, and resume state. Tests do not modify production data.
 
 ## Deployment
 
-The independent Vercel backend migration is staged behind `MOONLIT_BACKEND=native`; it must stay disabled until database/media import and live verification are complete. See [migration and recovery instructions](docs/vercel-migration.md). The legacy backend remains available during this transition.
+Native production uses `MOONLIT_BACKEND=native`. See [migration and recovery instructions](docs/vercel-migration.md) for environment, import, creator setup, and rollback details.
 
-Import this repository into Vercel as **Next.js**, keep the root directory at the repository root, and configure the three server-only variables above. The included `vercel.json` sets the build commands. Git commits can then trigger deployments automatically.
+Import this repository into Vercel as **Next.js**, keep the root directory at the repository root, and configure the native server-only variables described above. The included `vercel.json` sets the build commands. Git commits can then trigger deployments automatically.
 
 ## Assets
 

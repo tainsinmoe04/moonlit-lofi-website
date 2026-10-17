@@ -8,7 +8,7 @@ Playback supports Repeat off, Repeat all, and Repeat 1 on desktop and mobile. Re
 
 ## Latest website design
 
-The complete public website, captured from the live Vercel deployment.
+The final public website, captured from the live Vercel deployment on October 17, 2026. Click the screenshot to listen live.
 
 [![Moonlit Lofi — latest full-page website screenshot](docs/moonlit-lofi-full-page.jpg)](https://moonlit-lofi-website.vercel.app/)
 

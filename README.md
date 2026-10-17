@@ -61,6 +61,14 @@ Open `/studio` to use the creator account on the private backend. Studio support
 
 ## Validation
 
+### Member early access
+
+Studio → Members creates a personal 256-bit access code for an approved listener (1–366 days). It is displayed once; only its SHA-256 hash is stored. Revoke or restore access from the same tab. Listeners enter the code under Members; Vercel stores it in a Secure, HttpOnly, SameSite cookie for up to 30 days. This is invitation-code membership, not verified email identity or paid billing. Anyone holding a code can use it; share it privately.
+
+For a newly uploaded track, choose Published + Members — early access. An optional public release date uses the creator's browser time zone and is stored as UTC. Without a date, the track stays members-only. Catalog, playlists, and uploaded audio enforce access on the server. Public release becomes available on the next refresh; the player refreshes every minute and on tab focus. Previously public/downloaded files cannot be recalled; upload new audio for unreleased member tracks. Static sample audio cannot be member-gated. Private artwork bypasses the shared image optimizer.
+
+Tests cover anonymous denial, hash-only code storage, expiry/revocation, draft exclusion, media access, scheduled release, cookie flags, and gateway isolation.
+
 Run `npm test` with Node.js 24 for the gateway, SQLite-backed creator routes, playlist visibility/order, date filters, and resume-state validation. Creator route tests use an isolated in-memory database, not production data.
 
 ## Deployment

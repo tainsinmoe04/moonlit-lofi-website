@@ -1,4 +1,4 @@
-export type Track={id:string;title:string;mood:string;audio:string;cover:string;youtube?:string;status?:"published"|"draft"|"unpublished"};
+export type Track={id:string;title:string;mood:string;audio:string;cover:string;youtube?:string;status?:"published"|"draft"|"unpublished";audience?:"public"|"members";release_at?:number|null};
 export type Playlist={id:string;title:string;description:string;trackIds:string[]};
 export type PlatformLink={label:string;url:string};
 export type ChannelSettings={links:PlatformLink[];about:string;contact:string};

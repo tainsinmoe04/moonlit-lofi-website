@@ -49,3 +49,19 @@ test('analytics uses inclusive date bounds and track filter without truncating e
  assert.equal((await r.GET(f.request('analytics?from=2026-02-30&to=2026-03-01'))).status,400);
  assert.equal((await r.GET(f.request('analytics?from=2020-01-01&to=2026-10-16'))).status,400);
 });
+
+test('member early access protects catalog, playlists and audio, then releases publicly',async()=>{
+ const f=await fixture(),members=await f.route('members'),session=await f.route('members/session'),tracks=await f.route('tracks'),lists=await f.route('playlists'),media=await f.route('media/[key]');
+ assert.equal((await members.POST(f.request('members','POST',{name:'Listener',days:30}))).status,403);f.signIn();
+ const grant=await(await members.POST(f.request('members','POST',{name:'Listener',days:30}))).json();assert.equal(grant.token.length,64);const stored=f.sqlite.prepare('SELECT * FROM members WHERE id=?').get(grant.id);assert.notEqual(stored.token_hash,grant.token);assert.equal(stored.token_hash.length,64);
+ const key='99999999-9999-4999-8999-999999999999',body={title:'Early track',mood:'Dream',audio:'/api/media/'+key,cover:'/media/dream-garden.png',status:'published',audience:'members',release_at:Date.now()+86400000};const {id}=await(await tracks.POST(f.request('tracks','POST',body))).json();await lists.POST(f.request('playlists','POST',{id:'early-list',title:'Early',description:'Preview',trackIds:[id]}));f.signOut();
+ const memberReq=(route)=>{const req=f.request(route);req.headers.set('x-moonlit-member',grant.token);return req};const has=async(req)=>(await(await tracks.GET(req)).json()).some(t=>t.id===id);
+ assert.equal(await has(f.request('tracks')),false);assert.equal(await has(memberReq('tracks')),true);assert.equal((await(await session.GET(memberReq('members/session'))).json()).member,true);
+ assert.equal((await media.GET(f.request('media/key'),{params:Promise.resolve({key})})).status,404);assert.equal((await media.GET(memberReq('media/key'),{params:Promise.resolve({key})})).status,200);
+ assert.equal((await(await lists.GET(f.request('playlists'))).json()).some(p=>p.id==='early-list'),false);assert.equal((await(await lists.GET(memberReq('playlists'))).json()).some(p=>p.id==='early-list'),true);
+ f.signIn();await members.PATCH(f.request('members','PATCH',{id:grant.id,active:false}));f.signOut();assert.equal(await has(memberReq('tracks')),false);assert.equal((await media.GET(memberReq('media/key'),{params:Promise.resolve({key})})).status,404);
+ f.signIn();await members.PATCH(f.request('members','PATCH',{id:grant.id,active:true}));await tracks.PATCH(f.request('tracks','PATCH',{id,status:'draft'}));f.signOut();assert.equal(await has(memberReq('tracks')),false);
+ f.signIn();await tracks.PATCH(f.request('tracks','PATCH',{id,status:'published',release_at:Date.now()-1000}));f.signOut();assert.equal(await has(f.request('tracks')),true);assert.equal((await media.GET(f.request('media/key'),{params:Promise.resolve({key})})).status,200);
+ f.sqlite.prepare('UPDATE members SET expires=0 WHERE id=?').run(grant.id);assert.equal((await(await session.GET(memberReq('members/session'))).json()).member,false);
+ f.signIn();assert.equal((await tracks.PATCH(f.request('tracks','PATCH',{id:'atlantis',audience:'members'}))).status,400);
+});

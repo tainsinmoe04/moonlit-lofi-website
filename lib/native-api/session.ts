@@ -1,0 +1,6 @@
+import {memberFor} from '../native-membership';
+const name='__Host-moonlit-member';
+const cookie=(token:string,age:number)=>`${name}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${Math.max(0,Math.floor(age))}`;
+export async function GET(req:Request){const m=await memberFor(req);return Response.json(m?{member:true,name:m.name,expires:m.expires}:{member:false})}
+export async function POST(req:Request){if(req.headers.get('origin')!==new URL(req.url).origin)return new Response('Forbidden',{status:403});const raw=await req.text();if(raw.length>256)return new Response('Invalid code',{status:400});const {code}=JSON.parse(raw);if(typeof code!=='string'||!/^[a-f0-9]{64}$/.test(code))return new Response('Invalid access code',{status:400});const probe=new Request(req.url,{headers:{cookie:name+'='+code}});const m=await memberFor(probe);if(!m)return new Response('This access code has expired or was revoked.',{status:401});return Response.json({member:true,name:m.name,expires:m.expires},{headers:{'Set-Cookie':cookie(code,Math.min(30*86400,(Number(m.expires)-Date.now())/1000))}})}
+export async function DELETE(req:Request){if(req.headers.get('origin')!==new URL(req.url).origin)return new Response('Forbidden',{status:403});return Response.json({member:false},{headers:{'Set-Cookie':cookie('',0)}})}

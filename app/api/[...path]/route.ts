@@ -8,6 +8,7 @@ export const dynamic='force-dynamic';
 const readRoutes=new Set(['tracks','playlists','settings']);
 async function proxy(req:Request,{params}:{params:Promise<{path:string[]}>}){
  const parts=(await params).path;const path=parts.join('/');
+ if(process.env.MOONLIT_BACKEND==='native')return (await import('@/lib/native-api')).handle(req,parts);
  const session=path==='members/session';
  if(session&&!['GET','POST','DELETE'].includes(req.method))return new Response('Not found',{status:404});
  if(session&&req.method!=='GET'&&req.headers.get('origin')!==new URL(req.url).origin)return new Response('Forbidden',{status:403});
@@ -49,3 +50,5 @@ export const GET=proxy;
 export const POST=proxy;
 
 export const DELETE=proxy;
+export const PATCH=proxy;
+export const PUT=proxy;

@@ -73,6 +73,8 @@ Run `npm test` with Node.js 24 for the gateway, SQLite-backed creator routes, pl
 
 ## Deployment
 
+The independent Vercel backend migration is staged behind `MOONLIT_BACKEND=native`; it must stay disabled until database/media import and live verification are complete. See [migration and recovery instructions](docs/vercel-migration.md). The legacy backend remains available during this transition.
+
 Import this repository into Vercel as **Next.js**, keep the root directory at the repository root, and configure the three server-only variables above. The included `vercel.json` sets the build commands. Git commits can then trigger deployments automatically.
 
 ## Assets

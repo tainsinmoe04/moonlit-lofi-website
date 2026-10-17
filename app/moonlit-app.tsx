@@ -9,7 +9,7 @@ import Artwork from './artwork';
 const MemberAccess=lazy(()=>import('./member-access'));
 const CreatorStudio=lazy(()=>import('./creator-studio'));
 const fmt=(n:number)=>Number.isFinite(n)?`${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,'0')}`:'0:00';
-export default function MoonlitApp({isAdmin=false,initialStudio=false}:{isAdmin?:boolean;initialStudio?:boolean}){
+export default function MoonlitApp({isAdmin=false,initialStudio=false,nativeBackend=false}:{isAdmin?:boolean;initialStudio?:boolean;nativeBackend?:boolean}){
  const [memberOpen,setMemberOpen]=useState(false);
  const [tracks,setTracks]=useState<Track[]>([]),[playlists,setPlaylists]=useState<Playlist[]>([]),[settings,setSettings]=useState<ChannelSettings>(defaultSettings);
  const [selected,setSelected]=useState(seed[0]),[playing,setPlaying]=useState(false),[position,setPosition]=useState(0),[duration,setDuration]=useState(0),[mood,setMood]=useState('All'),[query,setQuery]=useState(''),[liked,setLiked]=useState<string[]>([]),[repeat,setRepeat]=useState<'off'|'all'|'one'>('off'),[showAllPlaylists,setShowAllPlaylists]=useState(false),[shuffle,setShuffle]=useState(false),[queueOpen,setQueueOpen]=useState(false),[activePlaylist,setActivePlaylist]=useState<string|null>(null),[studio,setStudio]=useState(initialStudio&&isAdmin),[notice,setNotice]=useState(''),[privacy,setPrivacy]=useState(false),[menu,setMenu]=useState(false),[timer,setTimer]=useState(0),[volumeLevel,setVolumeLevel]=useState(.7),[catalogReady,setCatalogReady]=useState(false),[catalogError,setCatalogError]=useState('');
@@ -51,6 +51,6 @@ export default function MoonlitApp({isAdmin=false,initialStudio=false}:{isAdmin?
  {notice?<div role="status" className="toast">{notice}<button aria-label="Dismiss message" onClick={()=>setNotice('')}><X size={16}/></button></div>:null}
  {privacy?<div className="modal-backdrop"><section className="privacy-dialog" role="dialog" aria-modal="true" aria-label="Privacy"><div className="panel-title"><h2>Privacy</h2><button onClick={()=>setPrivacy(false)} aria-label="Close privacy"><X/></button></div><p>Moonlit Lofi records track listening time, approximate network country, and timestamps for channel insights. Raw IP addresses are not stored in the listening database.</p><p>Favorites are stored in this browser. Member access uses a secure cookie; approved member names, code hashes and expiry dates are stored privately. Creator sign-in is handled by ChatGPT. YouTube and other platform links open external services with their own privacy policies.</p></section></div>:null}
  {memberOpen?<Suspense fallback={<div className="toast">Opening members…</div>}><MemberAccess close={()=>setMemberOpen(false)} changed={async()=>{audio.current?.pause();await refresh()}}/></Suspense>:null}
- {isAdmin&&studio?<Suspense fallback={<div className="toast">Opening studio…</div>}><CreatorStudio tracks={tracks} playlists={playlists} settings={settings} refresh={refresh} close={()=>setStudio(false)} notify={setNotice}/></Suspense>:null}
+ {isAdmin&&studio?<Suspense fallback={<div className="toast">Opening studio…</div>}><CreatorStudio nativeUploads={nativeBackend} tracks={tracks} playlists={playlists} settings={settings} refresh={refresh} close={()=>setStudio(false)} notify={setNotice}/></Suspense>:null}
  </main>
 }

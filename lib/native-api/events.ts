@@ -1,0 +1,4 @@
+import {db} from '../database';
+import {allTracks} from '../native-data';
+import {memberFor} from '../native-membership';
+export async function POST(req:Request){if(req.headers.get('origin')!==new URL(req.url).origin)return new Response('Forbidden',{status:403});const raw=await req.text();if(raw.length>2048)return new Response('Event too large',{status:413});const b=JSON.parse(raw);if(typeof b.track!=='string'||!Number.isInteger(b.seconds)||b.seconds<1||b.seconds>30)return new Response('Invalid event',{status:400});if(!(await allTracks(false,!!await memberFor(req))).some(t=>t.id===b.track))return new Response('Unknown track',{status:400});const geo=req.headers.get('x-vercel-ip-country')||'',country=/^[A-Z]{2}$/.test(geo)?geo:'Unknown';await db.prepare('INSERT INTO events (id,track,country,at,seconds) VALUES (?,?,?,?,?)').bind(crypto.randomUUID(),b.track,country,Date.now(),b.seconds).run();return new Response(null,{status:204})}
